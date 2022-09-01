@@ -15,16 +15,19 @@ func main()  {
 	*/
 
 	
-	// Set 1 Challenge 2
+	// // Set 1 Challenge 2
 	
-	buffer1 := "1c0111001f010100061a024b53535009181c"
-	buffer2 := "686974207468652062756c6c277320657965"
+	// buffer1 := "1c0111001f010100061a024b53535009181c"
+	// buffer2 := "686974207468652062756c6c277320657965"
 
-	// expectedXORCombination := "746865206b696420646f6e277420706c6179"
-	actualXORCombination := fixedXOR(hexToByte(buffer1), hexToByte(buffer2))
+	// // expectedXORCombination := "746865206b696420646f6e277420706c6179"
+	// actualXORCombination := fixedXOR(hexToByte(buffer1), hexToByte(buffer2))
 	
-	fmt.Printf("%x\n", string(actualXORCombination))
+	// fmt.Printf("%x\n", string(actualXORCombination))
 	
+	// Set 1 Challenge 3
+	problem := "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
 
+	fmt.Println(SingleByteXORCipher(hexToByte(problem)))
 
 }
