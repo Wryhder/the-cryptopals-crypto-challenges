@@ -73,11 +73,13 @@ func textScorer(text string) float64 {
 		var freqMap = make(map[string]float64)
 
 		for _, char := range text {
-			if unicode.IsPunct(char) || unicode.IsSpace(char) {
+			if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') {
+				// letterFreqInText / lengthOfText = charFreqScore
+				freqMap[string(char)] = float64(countCharFreq(text)[string(char)] / lengthOfText)
+			} else {
 				continue
 			}
-			// letterFreqInText / lengthOfText = charFreqScore
-			freqMap[string(char)] = float64(countCharFreq(text)[string(char)] / lengthOfText)
+			
 		}
 		return freqMap
 	}()
