@@ -25,9 +25,12 @@ func main()  {
 	
 	// fmt.Printf("%x\n", string(actualXORCombination))
 	
-	// Set 1 Challenge 3
-	problem := "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
+	// // Set 1 Challenge 3
+	// problem := "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
 
-	fmt.Println(SingleByteXORCipher(hexToByte(problem)))
+	// fmt.Println(SingleByteXORCipher(hexToByte(problem)))
+
+	// Set 1 Challenge 4
+	fmt.Println(DetectSingleCharXOR("./data/s1c4_60charstrings.txt"))
 
 }
