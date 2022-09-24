@@ -17,6 +17,8 @@ import (
 // func DetectSingleCharXOR (filePath string) string {
 func DetectSingleCharXOR (filePath string) map[string]string {
 	f, _ := os.Open(filePath)
+	defer f.Close() 
+
 	var allResults = make(map[string]string)
 	highestTextScore := 0.0
 
