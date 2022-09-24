@@ -72,8 +72,8 @@ func textScorer(text string) float64 {
 	letterFreqScoresInText := func() map[string]float64 {
 		var freqMap = make(map[string]float64)
 
-		for _, char := range text {
-			if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') {
+		for _, char := range strings.ToLower(text) {
+			if (char >= 'a' && char <= 'z') {
 				// letterFreqInText / lengthOfText = charFreqScore
 				freqMap[string(char)] = float64(countCharFreq(text)[string(char)] / lengthOfText)
 			} else {
