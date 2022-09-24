@@ -16,16 +16,16 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	"unicode"
+	// "unicode"
 )
 
 func countCharFreq(s string) map[string]int {
 	var characterCount = make(map[string]int)
 
 	for _, char := range s {
-		if unicode.IsPunct(char) || unicode.IsSpace(char) {
-			continue
-		}
+		// if unicode.IsPunct(char) || unicode.IsSpace(char) {
+		// 	continue
+		// }
 		characterCount[strings.ToUpper(string(char))] += 1
 	}
 
@@ -90,7 +90,7 @@ func textScorer(text string) float64 {
 	var listOfAbsDiffs []float64
 	for _, engCharScore := range englishLetterFreqScores {
 		for _, textCharScore := range letterFreqScoresInText {
-			listOfAbsDiffs = append(listOfAbsDiffs, math.Abs(engCharScore-textCharScore))
+			listOfAbsDiffs = append(listOfAbsDiffs, math.Abs(engCharScore - textCharScore))
 		}
 	}
 
