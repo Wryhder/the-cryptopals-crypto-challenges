@@ -30,7 +30,12 @@ func RepeatingKeyXOR(plaintext, secretKey string) string {
 
 	// Each character in the plaintext is XORed with a byte of the key
 	cipher := fixedXOR([]byte(plaintext), []byte(repeatedKey))
-	encodedCipher = hex.EncodeToString(cipher)
 
+	encodedCipher = hex.EncodeToString(cipher)
 	return encodedCipher
+}
+
+func RepeatingKeyXORFile(filePath, key string) string {
+	fileContents := readTextFile(filePath)
+	return RepeatingKeyXOR(fileContents, key)
 }
