@@ -105,10 +105,10 @@ func BreakRepeatingKeyXOR(text string, lowerLimitGuessRange, upperLimitGuessRang
 	blockSize := keySize * BYTESIZE
 
 	// Break text into blocks of keySize length
-	cipherTextBlocks := []string{""}
+	var cipherTextBlocks []string
 
 	for i := 0; i < lengthOfBinString; i+=blockSize {
-		// This check prevents `runtime error: slice bounds out of range``
+		// This check prevents `runtime error: slice bounds out of range`
 		// which happens when the final block is less than blockSize
 		// e.g, slice bounds out of range [:23040] with length 23008
 		if (lengthOfBinString - i) < blockSize {
@@ -118,8 +118,39 @@ func BreakRepeatingKeyXOR(text string, lowerLimitGuessRange, upperLimitGuessRang
 		}
 	}
 
-	// TODO: Transpose the blocks: make a block that is the first byte of every block,
+	// Transpose the blocks: make a block that is the first byte of every block,
 	// and a block that is the second byte of every block, and so on
+	var transposedBlocks = make(map[int][]string)
+
+	/* 
+	Looping through cipherTextBlocks in the outer loop rather than the inner loop as in:
+	```
+	for currentByte := 0; currentByte < keySize; currentByte++ {
+	 	for _, block := range cipherTextBlocks {
+	```
+	prevents the quite pesky `slice bounds out of range` error I kept running into when
+	len(last block in cipherTextBlocks) is less than blockSize (since the loop continued on
+	as if the last block were of the same length as the previous ones even when it wasn't).
+
+	Using len(block) / BYTESIZE instead in the inner loop below ensures the inner loop
+	only runs for the exact length of the block, without expecting a specific number
+	of bytes (blockSize) and ignoring keySize altogether. 
+	*/
+	for _, block := range cipherTextBlocks {
+		numOfBytesInBlock := len(block) / BYTESIZE
+
+		for currentByte := 0; currentByte < numOfBytesInBlock; currentByte++ {
+			if currentByte == 0 {
+				// block[0:8*1]
+				transposedBlocks[currentByte] = append(transposedBlocks[currentByte], block[currentByte:BYTESIZE])
+			} else {
+				// block[8*1:8*2], block[8*2:8*3], block[8*3:8*4], ..., block[8*4:8*n]
+				transposedBlocks[currentByte] = append(transposedBlocks[currentByte], block[BYTESIZE*currentByte:BYTESIZE*(currentByte+1)])
+			}
+		}	
+	}
+
+	fmt.Println(transposedBlocks)
 
 	return 0
 }
