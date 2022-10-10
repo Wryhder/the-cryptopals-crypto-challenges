@@ -5,7 +5,8 @@ package main
 import (
 	"fmt"
 	"encoding/base64"
-	// "bytes"
+	"strings"
+	"sort"
 )
 
 // var testStr1 string = "this is a test"
@@ -32,7 +33,9 @@ func stringToBin(str string) string {
 }
 
 // Computes Hamming distance between two strings (in binary format) of equal length
-func HammingDistance(str1Bin, str2Bin string) int {
+func HammingDistance(str1, str2 string) int {
+	str1Bin := stringToBin(str1)
+	str2Bin := stringToBin(str2)
 	XORResult := make([]rune, len(str1Bin))
 
 	for i := 0; i < len(str1Bin); i++ {
@@ -49,77 +52,96 @@ func HammingDistance(str1Bin, str2Bin string) int {
 	return distance
 }
 
-// Find the minimum value in an integer slice
-func min(slice []int) int {
-	var minVal int
+// Computes the sum of an array
+func sum(array []float64) float64 {
+	result := 0.0
 
-    if len(slice) == 0 {
-        panic("Empty slice, darling. You don chop so?")
-    }
-
-	for i, e := range slice {
-		if i == 0 || e < minVal {
-			minVal = e
-		}
+	for _, value := range array {  
+		result += value  
 	}
 
-	return minVal
+	return result  
 }
 
-var BYTESIZE int = 8
-
-// Guess keySize (length of the key) used to perform repeating key XOR
+// Guess the length of the key used to encrypted text with repeating-key XOR
 func guessKeySize(text string, lowerLimitGuessRange, upperLimitGuessRange int) int {
-	var hd, normalizedHd int
-	var listOfNormalizedHds [39]int
-	var listOfKeySizeAndNormalizedHd = make(map[int]int)
-	var keySize int
+	var keySizesAndAverageNormalizedHds = make(map[int]float64)
+	lengthOfText := len(text)
 	
-	var count int = 0
+	/* For each keySize, find the hamming distance between every two adjacent blocks.
+	Then normalize each distance and average the normalized distances. */
 	for possibleKeySize := lowerLimitGuessRange; possibleKeySize <= upperLimitGuessRange; possibleKeySize++ {
-		// For each keySize, take the first and second keySize worth of bytes, and find the edit distance between them. Normalize this result by dividing by keySize.
-		hd = HammingDistance(stringToBin(text)[:((BYTESIZE * possibleKeySize) - 1)], stringToBin(text)[(BYTESIZE * possibleKeySize):(((BYTESIZE * possibleKeySize) * 2) - 1)])
+		var normalizedHds []float64
 
-		// Normalize calculated hamming distance by dividing by keySize
-		normalizedHd = hd / possibleKeySize
-		listOfNormalizedHds[count] = normalizedHd
-		listOfKeySizeAndNormalizedHd[possibleKeySize] = normalizedHd
+		for count := 0; count < lengthOfText; count+=possibleKeySize {
+			// This checks for the end of the text, when there isn't at least two blocks
+			// of possibleKeySize-length left (cannot find hamming distance of less than
+			// two full length blocks); Ignore any dangling bits.
+			if len(text[count:]) <= possibleKeySize * 2 {
+				break
+			} else {
+				// For example: block[0:8, 8:16], block[8:16, 16:24], block[16:24, 24:32],
+				// block[24:32, 32:40], ..., until end of text (as long as the loop index
+				// increments by possibleKeySize each time, such as `count+=possibleKeySize`)
+				firstBlock := text[count:count+possibleKeySize]
+				secondBlock := text[count+possibleKeySize:count+possibleKeySize*2]
 
-		count++
+				hammingDistance := HammingDistance(firstBlock, secondBlock)
+				normalizedHd := hammingDistance / possibleKeySize
+				normalizedHds = append(normalizedHds, float64(normalizedHd))
+			}
+		}
+
+		averageNormalizedHd := sum(normalizedHds) / float64(len(normalizedHds))
+		keySizesAndAverageNormalizedHds[possibleKeySize] = averageNormalizedHd
 	}
 	
-	for possibleKeySize, val := range listOfKeySizeAndNormalizedHd {
-		if val == min(listOfNormalizedHds[:]) {
-			keySize = possibleKeySize
-		}
+	/* Find and return the best keySize */
+	
+	// The list of averageNormalizedHds (for all key sizes) will be sorted
+	// to get the smallest value.
+	var averageNormalizedHds []float64
+	for _, averageNormalizedHd := range keySizesAndAverageNormalizedHds {
+		averageNormalizedHds = append(averageNormalizedHds, averageNormalizedHd)
     }
+	sort.Float64s(averageNormalizedHds[:])
+	
+	// Get all key size matching the minimum normalized hd
+	var bestKeySize int
+	for possibleKeySize, normalizedHd := range keySizesAndAverageNormalizedHds {
+		if normalizedHd == averageNormalizedHds[0] {
+			bestKeySize = possibleKeySize
+		}
 
-	return keySize
+    }
+	fmt.Println(keySizesAndAverageNormalizedHds)
+
+	return bestKeySize
 }
 
-func BreakRepeatingKeyXOR(text string, lowerLimitGuessRange, upperLimitGuessRange int) int {
-	decodedStr := decodeBase64(text)
-	keySize := guessKeySize(decodedStr, lowerLimitGuessRange, upperLimitGuessRange)
-	binStr := stringToBin(decodedStr)
-	lengthOfBinString := len(binStr)
-	blockSize := keySize * BYTESIZE
+// Break ciphertext into blocks of keySize length
+func breakTextIntoBlocks(decodedStr string, keySize int) []string {
+	lengthOfdecodedStr := len(decodedStr)
 
 	// Break text into blocks of keySize length
 	var cipherTextBlocks []string
 
-	for i := 0; i < lengthOfBinString; i+=blockSize {
-		// This check prevents `runtime error: slice bounds out of range`
-		// which happens when the final block is less than blockSize
-		// e.g, slice bounds out of range [:23040] with length 23008
-		if (lengthOfBinString - i) < blockSize {
-			cipherTextBlocks = append(cipherTextBlocks, binStr[i:lengthOfBinString])
+	for i := 0; i < lengthOfdecodedStr; i+=keySize {
+		// This check prevents a possible `runtime error: slice bounds out of range`
+		// which may occur when the final block is less than keySize
+		if (lengthOfdecodedStr - i) < keySize {
+			cipherTextBlocks = append(cipherTextBlocks, decodedStr[i:lengthOfdecodedStr])
 		} else {
-			cipherTextBlocks = append(cipherTextBlocks, binStr[i:i + blockSize])
+			cipherTextBlocks = append(cipherTextBlocks, decodedStr[i:i + keySize])
 		}
 	}
 
-	// Transpose the blocks: make a block that is the first byte of every block,
-	// and a block that is the second byte of every block, and so on
+	return cipherTextBlocks
+}
+
+// Transpose ciphertext blocks: make a block that is the first byte of every block,
+// and a block that is the second byte of every block, and so on
+func transposeBlocks(cipherTextBlocks []string) map[int][]string {
 	var transposedBlocks = make(map[int][]string)
 
 	/* 
@@ -128,29 +150,43 @@ func BreakRepeatingKeyXOR(text string, lowerLimitGuessRange, upperLimitGuessRang
 	for currentByte := 0; currentByte < keySize; currentByte++ {
 	 	for _, block := range cipherTextBlocks {
 	```
-	prevents the quite pesky `slice bounds out of range` error I kept running into when
-	len(last block in cipherTextBlocks) is less than blockSize (since the loop continued on
-	as if the last block were of the same length as the previous ones even when it wasn't).
+	prevents a possible `slice bounds out of range` error that may occur when
+	len(last block in cipherTextBlocks) is less than keySize (since the loop may continue on
+	as if the last block were of the same length as the previous ones even when it isn't).
 
-	Using len(block) / BYTESIZE instead in the inner loop below ensures the inner loop
+	Using len(block) instead in the inner loop below ensures the inner loop
 	only runs for the exact length of the block, without expecting a specific number
-	of bytes (blockSize) and ignoring keySize altogether. 
+	of bytes (keySize) and ignoring keySize altogether. 
 	*/
 	for _, block := range cipherTextBlocks {
-		numOfBytesInBlock := len(block) / BYTESIZE
+		numOfBytesInBlock := len(block)
 
 		for currentByte := 0; currentByte < numOfBytesInBlock; currentByte++ {
-			if currentByte == 0 {
-				// block[0:8*1]
-				transposedBlocks[currentByte] = append(transposedBlocks[currentByte], block[currentByte:BYTESIZE])
-			} else {
-				// block[8*1:8*2], block[8*2:8*3], block[8*3:8*4], ..., block[8*4:8*n]
-				transposedBlocks[currentByte] = append(transposedBlocks[currentByte], block[BYTESIZE*currentByte:BYTESIZE*(currentByte+1)])
-			}
+			transposedBlocks[currentByte] = append(transposedBlocks[currentByte], string(block[currentByte]))
 		}	
 	}
 
-	fmt.Println(transposedBlocks)
+	return transposedBlocks
+}
 
-	return 0
+func BreakRepeatingKeyXOR(text string, lowerLimitGuessRange, upperLimitGuessRange int) string {
+	decodedStr := decodeBase64(text)
+	keySize := guessKeySize(decodedStr, lowerLimitGuessRange, upperLimitGuessRange)
+
+	// Break text into blocks of keySize length
+	cipherTextBlocks := breakTextIntoBlocks(decodedStr, keySize)
+	
+	// Transpose and attempt to solve ciphertext blocks
+	transposedBlocks := transposeBlocks(cipherTextBlocks)
+	var joinedBlockStr, result string
+
+	// Solve each block in transposedBlocks as if it was single-character XOR
+	for _, block := range transposedBlocks {
+		joinedBlockStr = strings.Join(block[:], "")
+		result = SingleByteXORCipher([]byte(joinedBlockStr))
+		fmt.Println()
+		fmt.Println(result)
+	}
+
+	return ""
 }
