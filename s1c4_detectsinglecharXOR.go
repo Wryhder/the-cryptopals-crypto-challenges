@@ -29,7 +29,7 @@ func DetectSingleCharXOR (filePath string) map[string]string {
 	// that was encrypted by single-character XOR 
     for scanner.Scan() {
 		line := scanner.Text()
-		decryptedVal := SingleByteXORCipher(hexToByte(line))
+		_, decryptedVal := SingleByteXORCipher(hexToByte(line))
 		currentScore := textScorer(decryptedVal)
 
 		fmt.Println(currentScore)

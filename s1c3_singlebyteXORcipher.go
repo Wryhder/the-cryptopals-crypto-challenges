@@ -111,7 +111,7 @@ func textScorer(text string) float64 {
 	return textScore
 }
 
-func SingleByteXORCipher(text []byte) string {
+func SingleByteXORCipher(text []byte) (string, string) {
 	lengthOfText := len(text)
 	XORCombination := make([]byte, lengthOfText)
 
@@ -152,5 +152,8 @@ func SingleByteXORCipher(text []byte) string {
 		}
 	}
 
-	return allResults[fmt.Sprintf("%.5f", highestTextScore)]["decryptedText"]
+	encryptionKey := allResults[fmt.Sprintf("%.5f", highestTextScore)]["key"]
+	decryptedText := allResults[fmt.Sprintf("%.5f", highestTextScore)]["decryptedText"]
+
+	return encryptionKey, decryptedText
 }
