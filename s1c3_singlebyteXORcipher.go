@@ -131,7 +131,7 @@ func SingleByteXORCipher(text []byte) (string, string) {
 	highestTextScore := 0.0
 
 	// Brute-force decryption: XOR ciphertext with all possible key values (1 - 255)
-	for key := 0; key <= 255; key++ {
+	for key := 0; key <= 127; key++ {
 
 		for j := 0; j < lengthOfText; j++ {
 			XORCombination[j] = text[j] ^ uint8(key)
