@@ -26,7 +26,7 @@ func countCharFreq(s string) map[string]int {
 		// if unicode.IsPunct(char) || unicode.IsSpace(char) {
 		// 	continue
 		// }
-		characterCount[strings.ToUpper(string(char))] += 1
+		characterCount[strings.ToLower(string(char))] += 1
 	}
 
 	return characterCount
@@ -75,7 +75,7 @@ func textScorer(text string) float64 {
 		for _, char := range strings.ToLower(text) {
 			if (char >= 'a' && char <= 'z') {
 				// letterFreqInText / lengthOfText = charFreqScore
-				freqMap[string(char)] = float64(countCharFreq(text)[string(char)] / lengthOfText)
+				freqMap[string(char)] = float64(countCharFreq(text)[string(char)]) / float64(lengthOfText)
 			} else {
 				continue
 			}
@@ -140,8 +140,8 @@ func SingleByteXORCipher(text []byte) (string, string) {
 		// Score results based on letter frequency
 		currentScore := textScorer(string(XORCombination))
 
-		allResults[fmt.Sprintf("%.5f", currentScore)] = map[string]string{
-			"key":           fmt.Sprint(key),
+		allResults[fmt.Sprintf("%.15f", currentScore)] = map[string]string{
+			"key":           string(uint8(key)),
 			"decryptedText": string(XORCombination),
 		}
 
@@ -152,8 +152,8 @@ func SingleByteXORCipher(text []byte) (string, string) {
 		}
 	}
 
-	encryptionKey := allResults[fmt.Sprintf("%.5f", highestTextScore)]["key"]
-	decryptedText := allResults[fmt.Sprintf("%.5f", highestTextScore)]["decryptedText"]
+	encryptionKey := allResults[fmt.Sprintf("%.15f", highestTextScore)]["key"]
+	decryptedText := allResults[fmt.Sprintf("%.15f", highestTextScore)]["decryptedText"]
 
 	return encryptionKey, decryptedText
 }
