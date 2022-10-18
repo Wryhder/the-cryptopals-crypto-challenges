@@ -16,16 +16,12 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	// "unicode"
 )
 
 func countCharFreq(s string) map[string]int {
 	var characterCount = make(map[string]int)
 
 	for _, char := range s {
-		// if unicode.IsPunct(char) || unicode.IsSpace(char) {
-		// 	continue
-		// }
 		characterCount[strings.ToLower(string(char))] += 1
 	}
 
