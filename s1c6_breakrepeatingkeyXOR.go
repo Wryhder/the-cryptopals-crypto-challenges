@@ -106,7 +106,7 @@ func guessKeySize(text string, lowerLimitGuessRange, upperLimitGuessRange int) i
     }
 	sort.Float64s(averageNormalizedHds[:])
 	
-	// Get all key size matching the minimum normalized hd
+	// Get all key sizes matching the minimum normalized hd
 	var bestKeySize int
 	for possibleKeySize, normalizedHd := range keySizesAndAverageNormalizedHds {
 		if normalizedHd == averageNormalizedHds[0] {
@@ -114,7 +114,6 @@ func guessKeySize(text string, lowerLimitGuessRange, upperLimitGuessRange int) i
 		}
 
     }
-	fmt.Println(keySizesAndAverageNormalizedHds)
 
 	return bestKeySize
 }
@@ -178,15 +177,25 @@ func BreakRepeatingKeyXOR(text string, lowerLimitGuessRange, upperLimitGuessRang
 	
 	// Transpose and attempt to solve ciphertext blocks
 	transposedBlocks := transposeBlocks(cipherTextBlocks)
-	var joinedBlockStr, result string
+
+	// Sort keys in transposedBlocks. This will be used to maintain iteration order
+	// so that the returned key is not an anagram of the right key.
+	var keysInTransposedBlocksMap []int
+	for key, _ := range transposedBlocks {
+		keysInTransposedBlocksMap = append(keysInTransposedBlocksMap, key)
+    }
+	sort.Ints(keysInTransposedBlocksMap[:])
 
 	// Solve each block in transposedBlocks as if it was single-character XOR
-	for _, block := range transposedBlocks {
-		joinedBlockStr = strings.Join(block[:], "")
-		result = SingleByteXORCipher([]byte(joinedBlockStr))
-		fmt.Println()
-		fmt.Println(result)
+	var joinedBlockStr string
+	var encryptionKey []string
+
+	for _, key := range keysInTransposedBlocksMap {
+		joinedBlockStr = strings.Join(transposedBlocks[key][:], "")
+		key, _ := SingleByteXORCipher([]byte(joinedBlockStr))
+
+		encryptionKey = append(encryptionKey, (key))
 	}
 
-	return ""
+	return strings.Join(encryptionKey, "")
 }

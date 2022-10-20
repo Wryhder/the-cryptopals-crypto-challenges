@@ -18,17 +18,18 @@ import (
 	"strings"
 )
 
-func countCharFreq(s string) map[string]int {
-	var characterCount = make(map[string]int)
+func countChar(s string) map[string]int {
+	var charCount = make(map[string]int)
 
 	for _, char := range s {
-		characterCount[strings.ToLower(string(char))] += 1
+		charCount[strings.ToLower(string(char))] += 1
 	}
 
-	return characterCount
+	return charCount
 }
 
 var englishLetterFreqScores = map[string]float64{
+	" ": 0.15,
 	"a": 0.08167,
 	"b": 0.01492,
 	"c": 0.02782,
@@ -58,8 +59,8 @@ var englishLetterFreqScores = map[string]float64{
 }
 
 /*
-This function scores strings based on letter frequency,
-(when compared with the character frequency scores of standard English strings),
+This function scores strings based on letter frequency
+(when compared with the letter frequency scores of standard English strings),
 to determine how likely a string is to being correct English.
 */
 func textScorer(text string) float64 {
@@ -67,42 +68,35 @@ func textScorer(text string) float64 {
 
 	letterFreqScoresInText := func() map[string]float64 {
 		var freqMap = make(map[string]float64)
+		charCount := countChar(text)
 
-		for _, char := range strings.ToLower(text) {
-			if (char >= 'a' && char <= 'z') {
-				// letterFreqInText / lengthOfText = charFreqScore
-				freqMap[string(char)] = float64(countCharFreq(text)[string(char)]) / float64(lengthOfText)
+		for char, _ := range englishLetterFreqScores {
+			charCode := []rune(char)[0]
+
+			if (charCode == ' ') || (charCode >= 'a' && charCode <= 'z')  {
+				freqMap[char] = float64(charCount[char]) * 100 / float64(lengthOfText)
 			} else {
 				continue
-			}
-			
+			}	
 		}
 		return freqMap
 	}()
 
-	// Calculate the absolute difference between the frequencies
-	// of letters in the text and the corresponding letter
-	// in the English Language
-	var listOfAbsDiffs []float64
-	for _, engCharScore := range englishLetterFreqScores {
-		for _, textCharScore := range letterFreqScoresInText {
-			listOfAbsDiffs = append(listOfAbsDiffs, math.Abs(engCharScore - textCharScore))
-		}
-	}
-
-	// Calculate the sum of the absolute differences in listOfAbsDiffs
+	// Calculate the sum of the absolute differences between the frequencies
+	// of each letter in the text and the corresponding frequency of the letter
+	// in standard English usage
 	sumOfAbsDiff := func() float64 {
 		total := 0.0
 
-		for _, value := range listOfAbsDiffs {
-			total += value * 100 // convert to percentages
+		for textChar, _ := range letterFreqScoresInText {
+			total += math.Abs(englishLetterFreqScores[textChar] - letterFreqScoresInText[textChar])
 		}
 
 		return total
 	}()
 
-	// Calculate the average of the absolute differences in listOfAbsDiffs
-	textScore := sumOfAbsDiff / float64(lengthOfText)
+	// Calculate the average of the absolute differences
+	textScore := sumOfAbsDiff / float64(len(letterFreqScoresInText))
 
 	return textScore
 }
@@ -127,7 +121,7 @@ func SingleByteXORCipher(text []byte) (string, string) {
 	highestTextScore := 0.0
 
 	// Brute-force decryption: XOR ciphertext with all possible key values (1 - 255)
-	for key := 0; key <= 127; key++ {
+	for key := 0; key <= 255; key++ {
 
 		for j := 0; j < lengthOfText; j++ {
 			XORCombination[j] = text[j] ^ uint8(key)
