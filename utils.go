@@ -7,6 +7,8 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+	"encoding/base64"
+	"log"
 )
 
 // Read image file
@@ -24,8 +26,19 @@ func getImageFromFilePath(filePath string) (image.Image, error) {
 func readTextFile(filePath string) string {
 	content, err := ioutil.ReadFile(filePath)
     if err != nil {
-        fmt.Println(err)
+        fmt.Println("Unable to open file: ", err)
     }
 	
     return string(content)
 }
+
+// Decodes Base64 to string
+func decodeBase64(str string) string {
+	decodedStr, e := base64.StdEncoding.DecodeString(str)
+    if e != nil {
+        fmt.Println(e)
+    }
+    
+	return string(decodedStr)
+}
+

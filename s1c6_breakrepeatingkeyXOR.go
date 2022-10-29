@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"encoding/base64"
 	"strings"
 	"sort"
 )
@@ -12,16 +11,6 @@ import (
 // var testStr1 string = "this is a test"
 // var testStr2 string = "wokka wokka!!!"
 var sampleFile = "./data/s1c6_encodedrepeatingkeyXORsample.txt"
-
-// Decodes Base64 to string
-func decodeBase64(str string) string {
-	decodedStr, e := base64.StdEncoding.DecodeString(str)
-    if e != nil {
-        fmt.Println(e)
-    }
-    
-	return string(decodedStr)
-}
 
 // Converts string to binary format
 func stringToBin(str string) string {

@@ -43,6 +43,10 @@ func main()  {
 	// fmt.Println(RepeatingKeyXOR(openingStanza, "ICE"))
 	// fmt.Println(RepeatingKeyXOR(string(hexToByte()), "ICE"))
 
-	// Set 1 Challenge 6
-	fmt.Println(BreakRepeatingKeyXOR((readTextFile(sampleFile)), 2, 40))
+	// // Set 1 Challenge 6
+	// fmt.Println(BreakRepeatingKeyXOR((readTextFile(sampleFile)), 2, 40))
+
+	// Set 1 Challenge 7
+	AESinECBFileContent := readTextFile("./data/s1c7_AESinECBmode.txt")
+	fmt.Println(DecryptAES128_ECB(AESinECBFileContent, "YELLOW SUBMARINE"))
 }
