@@ -50,6 +50,13 @@ func main()  {
 	// AESinECBFileContent := readTextFile("./data/s1c7_encodedAESinECBmodesample.txt")
 	// fmt.Println(DecryptAES128_ECB(AESinECBFileContent, "YELLOW SUBMARINE"))
 
-	// Set 1 Challenge 8
-	fmt.Println(DetectAES128_ECB("./data/s1c8_encodedciphertextstrings.txt"))
+	// // Set 1 Challenge 8
+	// fmt.Println(DetectAES128_ECB("./data/s1c8_encodedciphertextstrings.txt"))
+
+	// Set 2 Challenge 9
+	fmt.Println(PKCS7padding("YELLOW SUBMARINE", 20))
+	// fmt.Println(PKCS7padding("YELLOW SUBMARINE", 16))
+	// fmt.Println(PKCS7padding("YELLOW S", 8))
+	// fmt.Println(PKCS7padding("YELL", 8))
+	// fmt.Println(PKCS7padding("YELL0", 8))
 }
