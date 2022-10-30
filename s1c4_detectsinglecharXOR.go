@@ -14,8 +14,7 @@ import (
 3. Run strings through SingleByteXORCipher function
 */
 
-// func DetectSingleCharXOR (filePath string) string {
-func DetectSingleCharXOR (filePath string) map[string]string {
+func DetectSingleCharXOR (filePath string) string {
 	f, _ := os.Open(filePath)
 	defer f.Close() 
 
@@ -32,9 +31,7 @@ func DetectSingleCharXOR (filePath string) map[string]string {
 		_, decryptedVal := SingleByteXORCipher(hexToByte(line))
 		currentScore := textScorer(decryptedVal)
 
-		fmt.Println(currentScore)
-
-		allResults[fmt.Sprintf("%.5f", currentScore)] = decryptedVal
+		allResults[fmt.Sprintf("%.15f", currentScore)] = decryptedVal
 		
 		if currentScore < highestTextScore {
 			continue
@@ -43,6 +40,5 @@ func DetectSingleCharXOR (filePath string) map[string]string {
 		}
     }
 
-	// return allResults[fmt.Sprintf("%.5f", highestTextScore)]
-	return allResults
+	return allResults[fmt.Sprintf("%.15f", highestTextScore)]
 }
