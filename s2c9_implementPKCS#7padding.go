@@ -2,37 +2,21 @@
 
 package main
 
-import (
-	"strings"
-	"fmt"
-)
-
-func PKCS7padding(block string, blockSize int) string {
-	lengthOfBlock := len(block)
-	var paddedBlock, padValue string
-	toPad := blockSize - lengthOfBlock
-
-	if toPad != 0 {
-		if toPad < 10 {
-			padValue = "\\x0" + fmt.Sprintf("%v", toPad)
-			paddedBlock = block + strings.Repeat(padValue, toPad)
-		} else {
-			padValue = "\\x" + fmt.Sprintf("%v", toPad)
-			paddedBlock = block + strings.Repeat(padValue, toPad)
-		}
-	}
+func PKCS7padding(ciphertext []byte, blockSize int) []byte {
+	lengthOfCiphertext := len(ciphertext)
+	var paddedCiphertext []byte = ciphertext
+	toPad := lengthOfCiphertext % blockSize
+	padValue := blockSize - toPad
 
 	// if lengthOfBlock is an integer multiple of blockSize, add an extra block
 	// Confirms that last byte of the last block is not a pad byte
 	if toPad == 0 {
-		if blockSize < 10 {
-			padValue = "\\x0" + fmt.Sprintf("%v", blockSize)
-			paddedBlock = block + strings.Repeat(padValue, blockSize)
-		} else {
-			padValue = "\\x" + fmt.Sprintf("%v", blockSize)
-			paddedBlock = block + strings.Repeat(padValue, blockSize)
-		}
+		padValue = blockSize
 	}
 
-	return  paddedBlock
+	for n := 0; n < padValue; n++ {
+		paddedCiphertext = append(paddedCiphertext, byte(padValue))
+	}
+
+	return  paddedCiphertext
 }
