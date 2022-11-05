@@ -1,4 +1,4 @@
-package main
+package utilities
 
 import (
 	"os"
@@ -12,7 +12,7 @@ import (
 )
 
 // Read image file
-func getImageFromFilePath(filePath string) (image.Image, error) {
+func GetImageFromFilePath(filePath string) (image.Image, error) {
     f, err := os.Open(filePath)
     if err != nil {
         return nil, err
@@ -23,7 +23,7 @@ func getImageFromFilePath(filePath string) (image.Image, error) {
 }
 
 // Read text file
-func readTextFile(filePath string) string {
+func ReadTextFile(filePath string) string {
 	content, err := ioutil.ReadFile(filePath)
     if err != nil {
         fmt.Println("Unable to open file: ", err)
@@ -33,7 +33,7 @@ func readTextFile(filePath string) string {
 }
 
 // Decodes Base64 to string
-func decodeBase64(str string) string {
+func DecodeBase64(str string) string {
 	decodedStr, e := base64.StdEncoding.DecodeString(str)
     if e != nil {
         fmt.Println(e)
@@ -42,3 +42,17 @@ func decodeBase64(str string) string {
 	return string(decodedStr)
 }
 
+func AppendToFile(filePath, content string) {		
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatalf("failed opening file: %s", err)
+	}
+	defer file.Close()
+
+	len, err := file.WriteString(content)
+	if err != nil {
+		log.Fatalf("failed writing to file: %s", err)
+	}
+	fmt.Printf("\nLength: %d bytes", len)
+	fmt.Printf("\nFile Name: %s", file.Name())
+}

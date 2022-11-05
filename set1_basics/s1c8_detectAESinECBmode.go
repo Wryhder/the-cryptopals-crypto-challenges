@@ -1,6 +1,6 @@
 /* Set 1 Challenge 8 - Detect AES in ECB mode */
 
-package main
+package set1_basics
 
 import (
 	"bufio"
@@ -35,7 +35,7 @@ func DetectAES128_ECB(filePath string) (int, string) {
 		line := scanner.Text()
 
 		// for each line, split text into blocks of 16 bytes
-		cipherTextBlocks := breakLineIntoBlocks(hexToByte(line), 16)
+		cipherTextBlocks := breakLineIntoBlocks(HexToByte(line), 16)
 
 		for index, byteBlock := range cipherTextBlocks {
 			for n := 0; n < len(cipherTextBlocks); n++ {

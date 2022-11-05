@@ -1,10 +1,11 @@
 /* Set 1 Challenge 7 - AES in ECB mode */
 
-package main
+package set1_basics
 
 import (
 	"crypto/aes"
 	"fmt"
+	utils "wryhder/cryptopals-crypto-challenges/utilities"
 )
 
 // https://stackoverflow.com/questions/24072026/golang-aes-ecb-encryption
@@ -26,14 +27,14 @@ func EncryptAES128_ECB(plaintext, key string) string {
 		block.Encrypt(ciphertext[begin:end], []byte(plaintext[begin:end]))
 	}
 
-	encoded := byteToBase64(ciphertext)
+	encoded := ByteToBase64(ciphertext)
     return encoded
 }
 
 func DecryptAES128_ECB(ciphertext, key string) string {
 	// Comment out this line when calling this function from other functions
 	// that already decoded the ciphertext (such as DecryptAES128_CBC())
-	ciphertext = decodeBase64(ciphertext)
+	ciphertext = utils.DecodeBase64(ciphertext)
 	lengthOfCiphertext := len(ciphertext)
 	
 	block, err := aes.NewCipher([]byte(key))

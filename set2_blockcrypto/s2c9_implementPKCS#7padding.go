@@ -1,6 +1,6 @@
 /* Set 2 Challenge 9 - Implement PKCS#7 padding */
 
-package main
+package set2_blockcrypto
 
 func PKCS7padding(ciphertext []byte, blockSize int) []byte {
 	lengthOfCiphertext := len(ciphertext)

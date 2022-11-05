@@ -1,11 +1,12 @@
 /* Set 1 Challenge 6 - Break repeating-key XOR */
 
-package main
+package set1_basics
 
 import (
 	"fmt"
 	"strings"
 	"sort"
+	utils "wryhder/cryptopals-crypto-challenges/utilities"
 )
 
 // var testStr1 string = "this is a test"
@@ -158,7 +159,7 @@ func transposeBlocks(cipherTextBlocks []string) map[int][]string {
 }
 
 func BreakRepeatingKeyXOR(text string, lowerLimitGuessRange, upperLimitGuessRange int) string {
-	decodedStr := decodeBase64(text)
+	decodedStr := utils.DecodeBase64(text)
 	keySize := guessKeySize(decodedStr, lowerLimitGuessRange, upperLimitGuessRange)
 
 	// Break text into blocks of keySize length

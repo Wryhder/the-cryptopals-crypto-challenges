@@ -10,7 +10,7 @@ Approach (based on https://www.codementor.io/@arpitbhayani/deciphering-single-by
 
 */
 
-package main
+package set1_basics
 
 import (
 	"fmt"
@@ -63,7 +63,7 @@ This function scores strings based on letter frequency
 (when compared with the letter frequency scores of standard English strings),
 to determine how likely a string is to being correct English.
 */
-func textScorer(text string) float64 {
+func TextScorer(text string) float64 {
 	lengthOfText := len(text)
 
 	letterFreqScoresInText := func() map[string]float64 {
@@ -128,7 +128,7 @@ func SingleByteXORCipher(text []byte) (string, string) {
 		}
 
 		// Score results based on letter frequency
-		currentScore := textScorer(string(XORCombination))
+		currentScore := TextScorer(string(XORCombination))
 
 		allResults[fmt.Sprintf("%.15f", currentScore)] = map[string]string{
 			"key":           string(uint8(key)),

@@ -1,10 +1,11 @@
 /* Set 1 Challenge 5 - Implement repeating-key XOR */
 
-package main
+package set1_basics
 
 import (
 	"strings"
 	"encoding/hex"
+	utils "wryhder/cryptopals-crypto-challenges/utilities"
 )
 
 // Sample string for testing
@@ -29,13 +30,13 @@ func RepeatingKeyXOR(plaintext, secretKey string) string {
 	repeatedKey := firstPartOfRepeatedKey + secondPartOfRepeatedKey
 
 	// Each character in the plaintext is XORed with a byte of the key
-	cipher := fixedXOR([]byte(plaintext), []byte(repeatedKey))
+	cipher := FixedXOR([]byte(plaintext), []byte(repeatedKey))
 
 	encodedCipher = hex.EncodeToString(cipher)
 	return encodedCipher
 }
 
 func RepeatingKeyXORFile(filePath, key string) string {
-	fileContents := readTextFile(filePath)
+	fileContents := utils.ReadTextFile(filePath)
 	return RepeatingKeyXOR(fileContents, key)
 }

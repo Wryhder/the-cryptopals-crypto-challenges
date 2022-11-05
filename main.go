@@ -5,6 +5,9 @@ import (
 	// "strings"
 	// "strconv"
 	"bytes"
+
+	set2 "wryhder/cryptopals-crypto-challenges/set2_blockcrypto"
+	utils "wryhder/cryptopals-crypto-challenges/utilities"
 )
 
 func main()  {
@@ -77,10 +80,10 @@ func main()  {
 	// fmt.Println(PKCS7padding([]byte("YELL0"), 8))
 
 	// Set 2 Challenge 10
-	CBCFileContent := readTextFile("./data/s1c10_encodedAESinCBCmodesample.txt")
+	CBCFileContent := utils.ReadTextFile("./data/s1c10_encodedAESinCBCmodesample.txt")
 	IV := bytes.Repeat([]byte{byte(0)}, 16)
 	// fmt.Println(EncryptAES128_CBC(CBCFileContent, IV))
-	fmt.Println(DecryptAES128_CBC(CBCFileContent, "YELLOW SUBMARINE", IV))
+	fmt.Println(set2.DecryptAES128_CBC(CBCFileContent, "YELLOW SUBMARINE", IV))
 	// fmt.Println(len(CBCFileContent) % 16)
 	// fmt.Println(EncryptAES128_CBC("YELLOW SUBMARINE", ""))
 	// fmt.Println([]byte("YELLOW SUBMARINE\x04\x04\x04\x04"))

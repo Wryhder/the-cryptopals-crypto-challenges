@@ -1,8 +1,8 @@
 /* Set 1 Challenge 2 - Fixed XOR */
 
-package main
+package set1_basics
 
-func fixedXOR(buffer1, buffer2 []byte) []byte {
+func FixedXOR(buffer1, buffer2 []byte) []byte {
 	n := len(buffer1)
 	XORCombination := make([]byte, n)
 	

@@ -1,10 +1,12 @@
 /* Set 2 Challenge 10 - Implement CBC mode */
 
-package main
+package set2_blockcrypto
 
 import (
 	"bytes"
 	"crypto/aes"
+	set1 "wryhder/cryptopals-crypto-challenges/set1_basics"
+	utils "wryhder/cryptopals-crypto-challenges/utilities"
 )
 
 /*
@@ -37,13 +39,13 @@ func EncryptAES128_CBC(plaintext, key string, IV []byte) string {
 	for index, block := range plainTextBlocks {
 
 		if index == 0 {
-			XORed = fixedXOR(IV, block)
+			XORed = set1.FixedXOR(IV, block)
 		} else {
 			previousCiphertextBlock := cipherTextBlocks[index - 1]
-			XORed = fixedXOR(previousCiphertextBlock, block)
+			XORed = set1.FixedXOR(previousCiphertextBlock, block)
 		}
 
-		encrypted = EncryptAES128_ECB(string(XORed), key)
+		encrypted = set1.EncryptAES128_ECB(string(XORed), key)
 		cipherTextBlocks = append(cipherTextBlocks, []byte(encrypted))
 	}
 
@@ -52,20 +54,20 @@ func EncryptAES128_CBC(plaintext, key string, IV []byte) string {
 
 // Decrypt each block before XORing with previous block to recover plaintext
 func DecryptAES128_CBC(ciphertext, key string, IV []byte) string {
-	decodedCiphertext := decodeBase64(ciphertext)
+	decodedCiphertext := utils.DecodeBase64(ciphertext)
 	cipherTextBlocks := chunkifyText([]byte(decodedCiphertext), aes.BlockSize)
 
 	var plainTextBlocks [][]byte
 	var XORed []byte
 	var decrypted string
 	for index, block := range cipherTextBlocks {
-		decrypted = DecryptAES128_ECB(string(block), key)
+		decrypted = set1.DecryptAES128_ECB(string(block), key)
 
 		if index == 0 {
-			XORed = fixedXOR(IV, []byte(decrypted))
+			XORed = set1.FixedXOR(IV, []byte(decrypted))
 		} else {
 			previousCiphertextBlock := cipherTextBlocks[index - 1]
-			XORed = fixedXOR(previousCiphertextBlock, []byte(decrypted))
+			XORed = set1.FixedXOR(previousCiphertextBlock, []byte(decrypted))
 			
 		}
 		

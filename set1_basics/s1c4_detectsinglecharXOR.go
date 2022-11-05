@@ -1,6 +1,6 @@
 /* Set 1 Challenge 4 - Detect single-character XOR */
 
-package main
+package set1_basics
 
 import (
 	"bufio"
@@ -28,8 +28,8 @@ func DetectSingleCharXOR (filePath string) string {
 	// that was encrypted by single-character XOR 
     for scanner.Scan() {
 		line := scanner.Text()
-		_, decryptedVal := SingleByteXORCipher(hexToByte(line))
-		currentScore := textScorer(decryptedVal)
+		_, decryptedVal := SingleByteXORCipher(HexToByte(line))
+		currentScore := TextScorer(decryptedVal)
 
 		allResults[fmt.Sprintf("%.15f", currentScore)] = decryptedVal
 		
