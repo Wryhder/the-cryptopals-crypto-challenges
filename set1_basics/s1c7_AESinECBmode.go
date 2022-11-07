@@ -32,8 +32,6 @@ func EncryptAES128_ECB(plaintext, key string) string {
 }
 
 func DecryptAES128_ECB(ciphertext, key string) string {
-	// Comment out this line when calling this function from other functions
-	// that already decoded the ciphertext (such as DecryptAES128_CBC())
 	ciphertext = utils.DecodeBase64(ciphertext)
 	lengthOfCiphertext := len(ciphertext)
 	

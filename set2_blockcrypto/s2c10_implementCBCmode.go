@@ -46,7 +46,7 @@ func EncryptAES128_CBC(plaintext, key string, IV []byte) string {
 		}
 
 		encrypted = set1.EncryptAES128_ECB(string(XORed), key)
-		cipherTextBlocks = append(cipherTextBlocks, []byte(encrypted))
+		cipherTextBlocks = append(cipherTextBlocks, []byte(utils.DecodeBase64(encrypted)))
 	}
 
 	return set1.ByteToBase64(bytes.Join(cipherTextBlocks, []byte("")))
@@ -61,7 +61,7 @@ func DecryptAES128_CBC(ciphertext, key string, IV []byte) string {
 	var XORed []byte
 	var decrypted string
 	for index, block := range cipherTextBlocks {
-		decrypted = set1.DecryptAES128_ECB(string(block), key)
+		decrypted = set1.DecryptAES128_ECB(set1.ByteToBase64(block), key)
 
 		if index == 0 {
 			XORed = set1.FixedXOR(IV, []byte(decrypted))
