@@ -6,7 +6,18 @@ import (
 	utils "wryhder/cryptopals-crypto-challenges/utilities"
 )
 
-func TestEncryptAES128_CBC(t *testing.T) {}
+func TestEncryptAES128_CBC(t *testing.T) {
+	plaintext := "The afternoon is as hot as a fireplace."
+	key := "YELLOW SUBMARINE"
+	IV := bytes.Repeat([]byte{byte(0)}, 16)
+
+	actual := EncryptAES128_CBC(plaintext, key, IV)
+    expected := "3kHmcp52LR447kBgC/tWQBjrDRuBuWWgNtrTP5liZn0f7S9OYCRK+XdvCLkavNfv"
+
+    if actual != expected {
+        t.Errorf("actual %q, expected %q", actual, expected)
+    }
+}
 
 func TestDecryptAES128_CBC(t *testing.T) {
 	CBCFileContent := utils.ReadTextFile("../data/s1c10_encodedAESinCBCmodesample.txt")
