@@ -49,7 +49,7 @@ func EncryptAES128_CBC(plaintext, key string, IV []byte) string {
 		cipherTextBlocks = append(cipherTextBlocks, []byte(encrypted))
 	}
 
-	return string(bytes.Join(cipherTextBlocks, []byte("")))
+	return set1.ByteToBase64(bytes.Join(cipherTextBlocks, []byte("")))
 }
 
 // Decrypt each block before XORing with previous block to recover plaintext
