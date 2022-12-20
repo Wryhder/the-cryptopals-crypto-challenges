@@ -41,6 +41,18 @@ func DecodeBase64(str string) string {
 	return string(decodedStr)
 }
 
+// Chunk text into n-byte blocks, where n can be key size or block size
+// (assumes there are no dangling bits, such as in already-padded text)
+func ChunkifyText(text []byte, size int)  [][]byte {
+	var textBlocks [][]byte
+
+	for i := 0; i < len(text); i+=size {
+		textBlocks = append(textBlocks, text[i:i + size])
+	}
+
+	return textBlocks
+}
+
 func AppendToFile(filePath, content string) {		
 	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
