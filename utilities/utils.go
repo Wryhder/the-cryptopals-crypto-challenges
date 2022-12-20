@@ -3,7 +3,6 @@ package utilities
 import (
 	"os"
 	"fmt"
-	"io/ioutil"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -24,7 +23,7 @@ func GetImageFromFilePath(filePath string) (image.Image, error) {
 
 // Read text file
 func ReadTextFile(filePath string) string {
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
     if err != nil {
         fmt.Println("Unable to open file: ", err)
     }
