@@ -1,40 +1,88 @@
 package set2_blockcrypto
 
 import (
+	"bytes"
 	"crypto/aes"
-	"fmt"
+	"strings"
 	"testing"
 )
 
 func TestGenerateRandomAESKey(t *testing.T) {
-	key := generateRandomBytes(aes.BlockSize)
-	fmt.Println(key)
+	blockSize := aes.BlockSize
+
+	type TestCase struct {
+		input          []byte
+		expectedLength int
+	}
 
 	// Key should be a byte slice, length = blockSize
-	// Multiple keys should not be equal (20 keys to test?)
+	cases := []TestCase{
+		{
+			input:          generateRandomBytes(blockSize),
+			expectedLength: blockSize,
+		},
+		{
+			input:          generateRandomBytes(blockSize / 2),
+			expectedLength: blockSize / 2,
+		},
+		{
+			input:          generateRandomBytes(blockSize * 2),
+			expectedLength: blockSize * 2,
+		},
+	}
+
+	for _, c := range cases {
+		actualLength := len(c.input)
+		expectedLength := c.expectedLength
+
+		if actualLength != expectedLength {
+			t.Fatalf("Expected %q, got %q", expectedLength, actualLength)
+		}
+	}
+
+	// Test that generated keys are random
+	generatedKeys := [][]byte{cases[0].input} // initialize slice with one key for the loop below
+	for i := 1; i < 20; i++ {
+		generatedKeys = append(generatedKeys, generateRandomBytes(blockSize))
+
+		currentKey := generatedKeys[i]
+		previousKey := generatedKeys[i-1]
+
+		if bytes.Compare(currentKey, previousKey) == 0 {
+			t.Fatalf("Expected random, non-repeating keys, "+
+				"got identical keys: %q and %q", currentKey, previousKey)
+		}
+	}
 }
 
 func TestPadStartAndEnd(t *testing.T) {
-	plaintext := ""
-	paddedPlaintext := padStartAndEnd(plaintext)
-	fmt.Println(paddedPlaintext)
+	plaintext := "The afternoon is as hot as a fireplace."
+
+	for i := 0; i < 10; i++ {
+		paddedPlaintext := padStartAndEnd(plaintext)
+		lengthOfPaddedPlaintext := len(paddedPlaintext)
+		padding := (lengthOfPaddedPlaintext - len(plaintext)) / 2
+
+		// Test amount of padding added
+		if padding < 5 || padding > 10 {
+			t.Fatalf("Expected padding to be between 5 and 10 bytes, got %q", padding)
+		}
+
+		// Validate padding
+		extractedPlaintext := paddedPlaintext[padding : lengthOfPaddedPlaintext-padding]
+		if string(extractedPlaintext) != plaintext {
+			t.Fatalf("Invalid padding. Expected %q after stripping padding, got %q",
+				plaintext, extractedPlaintext)
+		}
+	}
 }
 
 func TestEncryptAES128_ECBOrCBC(t *testing.T) {
-	testCases := []string{
-		"We may note at the outset the spirit of pessimism which, like the curse on the hoard, pervades the whole.",
-		"Animals hoard food so they will have enough to get them through harsh winters.",
-		"I am from only discovering that secret hoard of love when it was too late to listen.",
-		"Many collectors hoard packages of the cards in the hopes that the next Mickey Mantle will come along and prove just as valuable.",
-		"Interesting piece on a viking hoard discovered on a farm in Sweden, which includes many Arabic coins.",
-		"However, when the Great Depression hit, President Franklin Roosevelt made it against the law to hoard or be in possession of gold.",
-	}
-
+	plaintext := "The afternoon is as hot as a fireplace."
 	modes := []string{""}
-	for _, c := range testCases {
-		fmt.Println(c)
-		_, encrypted := encryptAES128_ECBOrCBC("")
-		mode := ECB_CBCDetectionOracle(encrypted)
+
+	for i := 0; i < 5; i++ {
+		mode, _ := encryptAES128_ECBOrCBC(plaintext)
 		modes = append(modes, mode)
 	}
 
@@ -46,47 +94,18 @@ func TestEncryptAES128_ECBOrCBC(t *testing.T) {
 	ECBCount := modeCount["ECB"]
 	CBCCount := modeCount["CBC"]
 	if ECBCount < 1 && CBCCount < 1 {
-			t.Fatalf("Expected plaintext strings encrypted in ECB mode at least once," +
-			" got %q; Expected plaintext strings encrypted in CBC mode at least once," +
+		t.Fatalf("Expected plaintext strings encrypted in ECB mode at least once,"+
+			" got %q; Expected plaintext strings encrypted in CBC mode at least once,"+
 			" got %q", ECBCount, CBCCount)
-		}
-}
-
-type TestCase struct {
-	input    string
-	expected string
+	}
 }
 
 func TestECB_CBCDetectionOracle(t *testing.T) {
-	cases := []TestCase{
-		{
-			input:    "",
-			expected: "",
-		},
-		{
-			input:    "1",
-			expected: "1",
-		},
-		{
-			input:    "2",
-			expected: "2",
-		},
-		{
-			input:    "1",
-			expected: "1",
-		},
-		{
-			input:    "2",
-			expected: "2",
-		},
-	}
+	actual := ECB_CBCDetectionOracle(strings.Repeat("A", 64))
+	expectedOption1 := "ECB"
+	expectedOption2 := "CBC"
 
-	for _, c := range cases {
-		actual := ECB_CBCDetectionOracle(c.input)
-		expected := c.expected
-
-		if actual != expected {
-			t.Fatalf("Expected %q, got %q", expected, actual)
-		}
+	if actual != expectedOption1 && actual != expectedOption2 {
+		t.Fatalf("Expected either %q or %q, got %q", expectedOption1, expectedOption2, actual)
 	}
 }

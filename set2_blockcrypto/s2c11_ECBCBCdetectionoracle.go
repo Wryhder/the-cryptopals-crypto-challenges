@@ -10,8 +10,10 @@ import (
 	"bytes"
 	"time"
 	"fmt"
+	"encoding/hex"
 
 	set1 "wryhder/cryptopals-crypto-challenges/set1_basics"
+	utils "wryhder/cryptopals-crypto-challenges/utilities"
 )
 
 // Generate random bytes of specified size/length;
@@ -75,6 +77,9 @@ func encryptAES128_ECBOrCBC(plaintext string) (string, string) {
 	switch selectECBOrCBC() {
 		case "ECB":
 			mode = "ECB"
+			// Add PKCS7padding here; our ECB encrypting function does not pad plaintext
+			// and panics if provided with inadequate input (less than multiple of block size)
+			paddedPlaintext = string(PKCS7padding([]byte(paddedPlaintext), blockSize))
 			encrypted = set1.EncryptAES128_ECB(paddedPlaintext, key)
 		case "CBC":
 			mode = "CBC"
@@ -85,7 +90,25 @@ func encryptAES128_ECBOrCBC(plaintext string) (string, string) {
 	return mode, encrypted
 }
 
-func ECB_CBCDetectionOracle(block string) string {
-	// Analyze ciphertext block for the encryption algorithm used
-	return ""
+// Checks if ciphertext is encrypted in ECB mode
+func isECBMode(ciphertext string) bool {
+	return set1.DetectAES128_ECB(ciphertext)
+}
+
+// Detect encryption algorithm used to encrypt ciphertext block
+func ECB_CBCDetectionOracle(plaintext string) string {
+	_, ciphertext := encryptAES128_ECBOrCBC(plaintext)
+
+	// Convert from base64 to hex since our ECB detection function expects a hex string
+	ciphertext = hex.EncodeToString([]byte(utils.DecodeBase64(ciphertext)))
+
+	mode := ""
+
+	if isECBMode(ciphertext) {
+		mode = "ECB"
+	} else {
+		mode = "CBC"
+	}
+
+	return mode
 }
