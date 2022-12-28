@@ -9,24 +9,11 @@ import (
 	"math/big"
 	"bytes"
 	"time"
-	"fmt"
 	"encoding/hex"
 
 	set1 "wryhder/cryptopals-crypto-challenges/set1_basics"
 	utils "wryhder/cryptopals-crypto-challenges/utilities"
 )
-
-// Generate random bytes of specified size/length;
-// used to generate random AES keys or IVs
-func generateRandomBytes(size int) []byte {
-	randBytes := make([]byte, size)
-	_, err := rand.Read(randBytes)
-	if err != nil {
-		fmt.Println("error: ", err)
-		return nil
-	}
-	return randBytes
-}
 
 // Generate a random integer within given range (limits inclusive)
 // Used to choose amount of padding for plaintext 
@@ -68,7 +55,7 @@ func selectECBOrCBC() string {
 // Encrypt plaintext under ECB or CBC (random selection)
 func encryptAES128_ECBOrCBC(plaintext string) (string, string) {
 	blockSize := aes.BlockSize
-	key := string(generateRandomBytes(blockSize))
+	key := string(utils.GenerateRandomBytes(blockSize))
 	paddedPlaintext := string(padStartAndEnd(plaintext))
 
 	mode := ""
@@ -83,7 +70,7 @@ func encryptAES128_ECBOrCBC(plaintext string) (string, string) {
 			encrypted = set1.EncryptAES128_ECB(paddedPlaintext, key)
 		case "CBC":
 			mode = "CBC"
-			IV := generateRandomBytes(blockSize)
+			IV := utils.GenerateRandomBytes(blockSize)
 			encrypted = EncryptAES128_CBC(paddedPlaintext, key, IV)
 	}
 

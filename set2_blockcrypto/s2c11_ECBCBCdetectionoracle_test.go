@@ -5,6 +5,8 @@ import (
 	"crypto/aes"
 	"strings"
 	"testing"
+	
+	utils "wryhder/cryptopals-crypto-challenges/utilities"
 )
 
 func TestGenerateRandomAESKey(t *testing.T) {
@@ -18,15 +20,15 @@ func TestGenerateRandomAESKey(t *testing.T) {
 	// Key should be a byte slice, length = blockSize
 	cases := []TestCase{
 		{
-			input:          generateRandomBytes(blockSize),
+			input:          utils.GenerateRandomBytes(blockSize),
 			expectedLength: blockSize,
 		},
 		{
-			input:          generateRandomBytes(blockSize / 2),
+			input:          utils.GenerateRandomBytes(blockSize / 2),
 			expectedLength: blockSize / 2,
 		},
 		{
-			input:          generateRandomBytes(blockSize * 2),
+			input:          utils.GenerateRandomBytes(blockSize * 2),
 			expectedLength: blockSize * 2,
 		},
 	}
@@ -43,7 +45,7 @@ func TestGenerateRandomAESKey(t *testing.T) {
 	// Test that generated keys are random
 	generatedKeys := [][]byte{cases[0].input} // initialize slice with one key for the loop below
 	for i := 1; i < 20; i++ {
-		generatedKeys = append(generatedKeys, generateRandomBytes(blockSize))
+		generatedKeys = append(generatedKeys, utils.GenerateRandomBytes(blockSize))
 
 		currentKey := generatedKeys[i]
 		previousKey := generatedKeys[i-1]

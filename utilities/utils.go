@@ -8,6 +8,7 @@ import (
 	_ "image/png"
 	"encoding/base64"
 	"log"
+	"crypto/rand"
 )
 
 // Read image file
@@ -51,6 +52,18 @@ func ChunkifyText(text []byte, size int)  [][]byte {
 	}
 
 	return textBlocks
+}
+
+// Generate random bytes of specified size/length;
+// used to generate random AES keys or IVs
+func GenerateRandomBytes(size int) []byte {
+	randBytes := make([]byte, size)
+	_, err := rand.Read(randBytes)
+	if err != nil {
+		fmt.Println("error: ", err)
+		return nil
+	}
+	return randBytes
 }
 
 func AppendToFile(filePath, content string) {		
