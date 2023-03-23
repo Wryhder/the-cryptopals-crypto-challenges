@@ -15,8 +15,11 @@ import (
 )
 
 var ENCRYPTION_KEY []byte = utils.GenerateRandomBytes(aes.BlockSize)
+var lengthOfCiphertext int
+var endOfCipherTextReached bool
 
-// TODO:
+// Encrypts buffers under ECB mode using a consistent but unknown key
+// on each function run
 func EncryptAES128_ECB_SingleKey(plaintext string) string {
 	toAppend := "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkg" +
 		"aGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBq" +
@@ -24,19 +27,16 @@ func EncryptAES128_ECB_SingleKey(plaintext string) string {
 		"YnkK"
 
 	plaintext += utils.DecodeBase64(toAppend)
-	fmt.Println("length of plaintext + unknown string: ", len(plaintext))
 
 	// Add PKCS7padding here; our ECB encrypting function does not pad plaintext
 	// and panics if provided with inadequate input (less than multiple of block size)
 	paddedPlaintext := string(PKCS7padding([]byte(plaintext), aes.BlockSize))
-	fmt.Println("length of plaintext + unknown string + padding: ", len(paddedPlaintext))
-	fmt.Println()
 	ciphertext := set1.EncryptAES128_ECB(paddedPlaintext, string(ENCRYPTION_KEY))
 
 	return ciphertext
 }
 
-// TODO:
+// Detects the block size of a cipher
 func detectCipherBlockSize() int {
 	var ciphertextLengths []int
 	var blockSize int
@@ -58,7 +58,7 @@ func detectCipherBlockSize() int {
 	return blockSize
 }
 
-// TODO:
+// Detects whether or not encryption is AES-ECB
 func detectEncryptionMode(blockSize int) (string, error) {
 	ciphertext := EncryptAES128_ECB_SingleKey(strings.Repeat("A", blockSize*4))
 	// Convert from base64 to hex since our ECB detection function expects a hex string
@@ -74,44 +74,50 @@ func detectEncryptionMode(blockSize int) (string, error) {
 	return mode, nil
 }
 
-// TODO:
-func generateCiphertextsToMatchAgainst(n int, discoveredStr []string) map[string][]byte {
+// Generates a dictionary of every possible last byte by feeding different
+// strings to the oracle
+func generateCiphertextsToMatchAgainst(n int, decrypted []string) map[string][]byte {
 	var ciphertextsToMatchAgainst = make(map[string][]byte)
 
 	// TODO: Remove after testing
-	fmt.Println("generating a map possible ciphertexts...")
+	fmt.Println("generating a map of possible ciphertexts...")
 	for key := 0; key <= 255; key++ {
-		plaintext := strings.Repeat("A", n) + strings.Join(discoveredStr, "") +
+		plaintext := strings.Repeat("A", n) + strings.Join(decrypted, "") +
 			string(uint8(key))
 		ciphertext := EncryptAES128_ECB_SingleKey(plaintext)
+		// not using utility function because we want to work with raw bytes
+		// directly to avoid encoding-related errors
 		decoded, _ := base64.StdEncoding.DecodeString(ciphertext)
-
-		firstBlock := substr(string(decoded), 0, 16)
 		ciphertextsToMatchAgainst[plaintext] = decoded
-		// TODO: Remove after testing
-		fmt.Println(plaintext, ": ", firstBlock)
 	}
 
 	return ciphertextsToMatchAgainst
 }
 
-// TODO:
-func matchOutputToGeneratedCiphertexts(n int, discoveredStr []string,
+// Matches actual output of cipher against generated ciphertexts in a bid to decrypt
+// each byte of an unknown string appended to a plaintext by the cipher 
+func matchOutputToGeneratedCiphertexts(n, start, end int,
 	ciphertextsToMatchAgainst map[string][]byte) (matched string) {
 
-	blockSize := detectCipherBlockSize()
 	plaintext := strings.Repeat("A", n)
 	// TODO: Remove after testing
 	fmt.Println("plaintext: ", plaintext)
 	ciphertext := EncryptAES128_ECB_SingleKey(plaintext)
+	lengthOfCiphertext = len(ciphertext)
+	if end >= lengthOfCiphertext {
+		endOfCipherTextReached = true
+		fmt.Println("end: ", end)
+		fmt.Println("endOfCipherTextReached: ", endOfCipherTextReached)
+	}
 	// TODO: Remove after testing
 	fmt.Println("ciphertext: ", ciphertext)
 	decoded, _ := base64.StdEncoding.DecodeString(ciphertext)
 	// TODO: Remove after testing
 	fmt.Println("decoded: ", decoded)
+	fmt.Println("length of decoded: ", len(decoded))
 	
 	for key, value := range ciphertextsToMatchAgainst {
-		if bytes.Equal(value[:blockSize], decoded[:blockSize]) {
+		if bytes.Equal(value[start:end], decoded[start:end]) {
 			matched = key
 			// TODO: Remove after testing
 			fmt.Println("matchedCiphertext", matched)
@@ -122,57 +128,42 @@ func matchOutputToGeneratedCiphertexts(n int, discoveredStr []string,
 	return
 }
 
-// TODO:
+// Decrypts each byte of an unknown string appended to a plaintext by a cipher (AES-ECB)
 func ByteatatimeECBdecryption_Simple() string {
-	fmt.Println("ENCRYPTION_KEY: ", ENCRYPTION_KEY)
-	var bytesDiscovered []string
-
+	var decryptedBytes []string
 	blockSize := detectCipherBlockSize()
-	fmt.Println("blockSize: ", blockSize)
+	
 	_, err := detectEncryptionMode(blockSize)
 	if err == nil {
-		for n := blockSize - 1; n >= 0; n-- {
-			// TODO: Remove after testing
-			fmt.Println("generating dictionary of ciphertexts to match against...")
-			fmt.Println("bytesDiscovered: " + strings.Join(bytesDiscovered, ""))
-			ciphertextsToMatchAgainst := 
-				generateCiphertextsToMatchAgainst(n, bytesDiscovered)
-			// TODO: Remove after testing
-			fmt.Println()
-			fmt.Println()
-			fmt.Println("matching output to generated ciphertexts...")
-			matched := matchOutputToGeneratedCiphertexts(n, bytesDiscovered,
-				 ciphertextsToMatchAgainst)
-			fmt.Println("ENCRYPTION_KEY: ", ENCRYPTION_KEY)
-			fmt.Println("matched: ", matched)
-			fmt.Println("length of matchedCiphertext: ", len(matched))
-			discoveredByte := matched[len(matched)-1:]
-			fmt.Println("discoveredByte: ", discoveredByte)
-			bytesDiscovered = append(bytesDiscovered, discoveredByte)
-			fmt.Println()
-			// break
+		out:
+		for start, end := 0, blockSize; !endOfCipherTextReached;
+			start, end = start + blockSize, end + blockSize {
+			for n := blockSize - 1; n >= 0; n-- {
+				// TODO: Remove after testing
+				fmt.Println("generating dictionary of ciphertexts to match against...")
+				fmt.Println("decryptedBytes: " + strings.Join(decryptedBytes, ""))
+				ciphertextsToMatchAgainst := 
+					generateCiphertextsToMatchAgainst(n, decryptedBytes)
+				// TODO: Remove after testing
+				fmt.Println("number of discovered bytes", len(decryptedBytes))
+				fmt.Println()
+				fmt.Println()
+				fmt.Println("matching output to generated ciphertexts...")
+				matched := matchOutputToGeneratedCiphertexts(n, start, end,
+					ciphertextsToMatchAgainst)
+				fmt.Println("matched: ", matched)
+				// It's assumed we've hit the padding
+				if (len(matched) == 0) {
+					break out
+				}
+				fmt.Println("length of matchedCiphertext: ", len(matched))
+				discoveredByte := matched[len(matched)-1:]
+				fmt.Println("discoveredByte: ", []byte(discoveredByte))
+				decryptedBytes = append(decryptedBytes, discoveredByte)
+				fmt.Println()
+			}
 		}
 	}
 
-	
-	fmt.Println("ENCRYPTION_KEY: ", ENCRYPTION_KEY)
-	return "bytesDiscovered: " + strings.Join(bytesDiscovered, "")
-}
-
-// ----------------------------------------------------------------------------------
-
-// https://stackoverflow.com/a/56129336
-// TODO:
-func substr(input string, start int, length int) string {
-	asRunes := []rune(input)
-
-	if start >= len(asRunes) {
-		return ""
-	}
-
-	if start+length > len(asRunes) {
-		length = len(asRunes) - start
-	}
-
-	return string(asRunes[start : start+length])
+	return "decryptedBytes: " + strings.Join(decryptedBytes[:len(decryptedBytes) - 1], "")
 }
