@@ -79,8 +79,6 @@ func detectEncryptionMode(blockSize int) (string, error) {
 func generateCiphertextsToMatchAgainst(n int, decrypted []string) map[string][]byte {
 	var ciphertextsToMatchAgainst = make(map[string][]byte)
 
-	// TODO: Remove after testing
-	fmt.Println("generating a map of possible ciphertexts...")
 	for key := 0; key <= 255; key++ {
 		plaintext := strings.Repeat("A", n) + strings.Join(decrypted, "") +
 			string(uint8(key))
@@ -100,28 +98,20 @@ func matchOutputToGeneratedCiphertexts(n, start, end int,
 	ciphertextsToMatchAgainst map[string][]byte) (matched string) {
 
 	plaintext := strings.Repeat("A", n)
-	// TODO: Remove after testing
-	fmt.Println("plaintext: ", plaintext)
 	ciphertext := EncryptAES128_ECB_SingleKey(plaintext)
+
+	// This piece of code is pretty much useless, except that I need the
+	// endOfCipherTextReached check to get the loop in ByteatatimeECBdecryption_Simple
+	// to run at all.
 	lengthOfCiphertext = len(ciphertext)
 	if end >= lengthOfCiphertext {
 		endOfCipherTextReached = true
-		fmt.Println("end: ", end)
-		fmt.Println("endOfCipherTextReached: ", endOfCipherTextReached)
 	}
-	// TODO: Remove after testing
-	fmt.Println("ciphertext: ", ciphertext)
+
 	decoded, _ := base64.StdEncoding.DecodeString(ciphertext)
-	// TODO: Remove after testing
-	fmt.Println("decoded: ", decoded)
-	fmt.Println("length of decoded: ", len(decoded))
-	
 	for key, value := range ciphertextsToMatchAgainst {
 		if bytes.Equal(value[start:end], decoded[start:end]) {
 			matched = key
-			// TODO: Remove after testing
-			fmt.Println("matchedCiphertext", matched)
-			fmt.Println()
 		}
 	}
 
@@ -136,34 +126,27 @@ func ByteatatimeECBdecryption_Simple() string {
 	_, err := detectEncryptionMode(blockSize)
 	if err == nil {
 		out:
+		// The ciphertext is not directly accessible within this scope so I'm relying on 
+		// global variables (endOfCipherTextReached) to get this loop to run. I simply 
+		// couldn't think of anything else.
 		for start, end := 0, blockSize; !endOfCipherTextReached;
 			start, end = start + blockSize, end + blockSize {
 			for n := blockSize - 1; n >= 0; n-- {
-				// TODO: Remove after testing
-				fmt.Println("generating dictionary of ciphertexts to match against...")
-				fmt.Println("decryptedBytes: " + strings.Join(decryptedBytes, ""))
 				ciphertextsToMatchAgainst := 
 					generateCiphertextsToMatchAgainst(n, decryptedBytes)
-				// TODO: Remove after testing
-				fmt.Println("number of discovered bytes", len(decryptedBytes))
-				fmt.Println()
-				fmt.Println()
-				fmt.Println("matching output to generated ciphertexts...")
 				matched := matchOutputToGeneratedCiphertexts(n, start, end,
 					ciphertextsToMatchAgainst)
-				fmt.Println("matched: ", matched)
 				// It's assumed we've hit the padding
 				if (len(matched) == 0) {
 					break out
 				}
-				fmt.Println("length of matchedCiphertext: ", len(matched))
+
 				discoveredByte := matched[len(matched)-1:]
-				fmt.Println("discoveredByte: ", []byte(discoveredByte))
 				decryptedBytes = append(decryptedBytes, discoveredByte)
-				fmt.Println()
 			}
 		}
 	}
 
-	return "decryptedBytes: " + strings.Join(decryptedBytes[:len(decryptedBytes) - 1], "")
+	// decryptedBytes will include one padding character which we need to chop off
+	return strings.Join(decryptedBytes[:len(decryptedBytes) - 1], "")
 }
