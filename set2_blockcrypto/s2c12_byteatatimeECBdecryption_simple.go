@@ -127,8 +127,7 @@ func ByteatatimeECBdecryption_Simple() string {
 	if err == nil {
 		out:
 		// The ciphertext is not directly accessible within this scope so I'm relying on 
-		// global variables (endOfCipherTextReached) to get this loop to run. I simply 
-		// couldn't think of anything else.
+		// global variables (endOfCipherTextReached) to get this loop to run.
 		for start, end := 0, blockSize; !endOfCipherTextReached;
 			start, end = start + blockSize, end + blockSize {
 			for n := blockSize - 1; n >= 0; n-- {
